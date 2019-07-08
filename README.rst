@@ -24,37 +24,37 @@ Installing
 ----------
 
 * Clone the repository
-* `virtualenv -p python3.6 env`
-* `source env/bin/activate`
-* `pip install git+https://github.com/valedica/gensim.git`
+* :code:`virtualenv -p python3.6 env`
+* :code:`source env/bin/activate`
+* :code:`pip install git+https://github.com/valedica/gensim.git`
 * cd in repository
-* `pip install -e .`
+* :code:`pip install -e .`
 
 Note
 ----
 
-* Remember: when you call the `AlignedWordEmbeddings` the script creates a "model/" folder
+* Remember: when you call the :code:`AlignedWordEmbeddings` the script creates a "model/" folder
 * Remember: if a compass is present in the model folder, the model will not retrain a new compass
 
 How To Use
 ----------
 
-```python
+.. code-block:: python
 
-from aligned_word_embeddings import aligned_word_embeddings
+    from aligned_word_embeddings import aligned_word_embeddings
 
-from gensim.models.word2vec import Word2Vec
-kd = aligned_word_embeddings.AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
+    from gensim.models.word2vec import Word2Vec
+    kd = aligned_word_embeddings.AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
 
-kd.train_static("compass_text")
+    kd.train_static("compass_text")
 
-kd.train_slice("slice_one")
-kd.train_slice("slice_two")
+    kd.train_slice("slice_one")
+    kd.train_slice("slice_two")
 
-slice_one = Word2Vec.load("model/slice_one.model")
-slice_two = Word2Vec.load("model/slice_one.model")
+    slice_one = Word2Vec.load("model/slice_one.model")
+    slice_two = Word2Vec.load("model/slice_one.model")
 
-```
+
 
 Credits
 -------
