@@ -16,17 +16,45 @@ Aligned Word Embeddings
 
 
 
-Python Boilerplate contains all the boilerplate you need to create a Python package.
-
-
 * Free software: GNU General Public License v3
 * Documentation: https://aligned-word-embeddings.readthedocs.io.
 
 
-Features
---------
+Installing
+----------
 
-* TODO
+* Clone the repository
+* `virtualenv -p python3.6 env`
+* `source env/bin/activate`
+* `pip install git+https://github.com/valedica/gensim.git`
+* cd in repository
+* `pip install -e .`
+
+Note
+----
+
+* Remember: when you call the `AlignedWordEmbeddings` the script creates a "model/" folder
+* Remember: if a compass is present in the model folder, the model will not retrain a new compass
+
+How To Use
+----------
+
+```python
+
+from aligned_word_embeddings import aligned_word_embeddings
+
+from gensim.models.word2vec import Word2Vec
+kd = aligned_word_embeddings.AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
+
+kd.train_static("compass_text")
+
+kd.train_slice("slice_one")
+kd.train_slice("slice_two")
+
+slice_one = Word2Vec.load("model/slice_one.model")
+slice_two = Word2Vec.load("model/slice_one.model")
+
+```
 
 Credits
 -------
