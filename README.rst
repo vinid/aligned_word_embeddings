@@ -26,6 +26,7 @@ Installing
 * Clone the repository
 * :code:`virtualenv -p python3.6 env`
 * :code:`source env/bin/activate`
+* :code:`pip install cython`
 * :code:`pip install git+https://github.com/valedica/gensim.git`
 * cd in repository
 * :code:`pip install -e .`
@@ -34,7 +35,6 @@ Note
 ----
 
 * Remember: when you call the :code:`AlignedWordEmbeddings` the script creates a "model/" folder
-* Remember: if a compass is present in the model folder, the model will not retrain a new compass
 
 How To Use
 ----------
@@ -46,7 +46,7 @@ How To Use
 
     aligner = AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
 
-    aligner.train_compass("/path/to/compass_text")
+    aligner.train_compass("/path/to/compass_text", overwrite=False) # keep an eye on the overwrite behaviour
 
     slice_one = aligner.train_slice("/path/to/slice_one.txt", save=True)
     slice_two = aligner.train_slice("/path/to/slice_two.txt", save=True)
