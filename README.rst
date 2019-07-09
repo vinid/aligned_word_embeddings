@@ -48,10 +48,10 @@ How To Use
 
     kd.train_static("compass_text")
 
-    kd.train_slice("slice_one")
-    kd.train_slice("slice_two")
+    slice_one = kd.train_slice("slice_one", save=True)
+    slice_two = kd.train_slice("slice_two", save=True)
 
-    slice_one = Word2Vec.load("model/slice_one.model")
+    slice_one = Word2Vec.load("model/slice_one.model") # model loading with gensim
     slice_two = Word2Vec.load("model/slice_one.model")
 
 

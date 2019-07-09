@@ -13,6 +13,19 @@ import copy
 gvocab = None
 
 
+def most_similar_from_model(word, model_start, model_to, topn=10):
+    """
+    Returns the most similar words' vectors in model_to of a word vector in model_start
+    :param word:
+    :param model_start:
+    :param model_to:
+    :param topn:
+    :return:
+    """
+    vector = model_start[word]
+    return model_to.most_similar([vector], topn=topn)
+
+
 def my_rule(word, count, min_count):
     if word in gvocab:
         return utils.RULE_KEEP
@@ -24,7 +37,7 @@ class AlignedWordEmbeddings():
     def __init__(self, size=100, sg=0, siter=5, diter=5, ns=10, window=5, alpha=0.025,
                             min_count=5, workers=2, train = "train", test = "test", opath="model", init_mode="hidden"):
         """
-
+        
         :param size: Number of dimensions. Default is 100.
         :param sg: Neural architecture of Word2vec. Default is CBOW (). If 1, Skip-gram is employed.
         :param siter: Number of static iterations (epochs). Default is 5.
@@ -107,13 +120,15 @@ class AlignedWordEmbeddings():
         global gvocab
         gvocab = self.compass.wv.vocab
 
-    def train_slice(self, slice_text):
+    def train_slice(self, slice_text, save=True):
         if self.compass == None:
             return Exception("Missing Compass")
         print("Training temporal embeddings: slice {}.".format(slice_text))
         sentences = LineSentence(slice_text)
         model = self.train_model(sentences)
-        model.save(os.path.join(self.opath, os.path.splitext(os.path.basename(slice_text))[0]) + ".model")
+        if save:
+            model.save(os.path.join(self.opath, os.path.splitext(os.path.basename(slice_text))[0]) + ".model")
+        return model
 
     def evaluate(self):
         mfiles = glob.glob(self.opath + '/*.model')
