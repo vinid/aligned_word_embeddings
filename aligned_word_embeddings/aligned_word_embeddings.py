@@ -9,7 +9,6 @@ import glob
 import logging
 import copy
 
-
 def most_similar_from_model(word, model_start, model_to, topn=10):
     """
     Returns the most similar words' vectors in model_to of a word vector in model_start
@@ -27,7 +26,7 @@ class AlignedWordEmbeddings:
     Handles alignment between multiple slices of text
     """
     def __init__(self, size=100, sg=0, siter=5, diter=5, ns=10, window=5, alpha=0.025,
-                            min_count=5, workers=2, train = "train", test = "test", opath="model", init_mode="hidden"):
+                            min_count=5, workers=2, test = "test", opath="model", init_mode="hidden"):
         """
 
         :param size: Number of dimensions. Default is 100.
@@ -39,7 +38,6 @@ class AlignedWordEmbeddings:
         :param alpha: Initial learning rate. Default is 0.025.
         :param min_count: Min frequency for words over the entire corpus. Default is 5.
         :param workers: Number of worker threads. Default is 2.
-        :param train: Folder name of the diachronic corpus files for training.
         :param test: Folder name of the diachronic corpus files for testing.
         :param opath: Name of the desired output folder. Default is model.
         :param init_mode: If \"hidden\" (default), initialize temporal models with hidden embeddings of the context;'
@@ -58,7 +56,6 @@ class AlignedWordEmbeddings:
         self.dynamic_alpha = alpha
         self.min_count = min_count
         self.workers = workers
-        self.train = train
         self.test = test
         self.opath = opath
         self.init_mode = init_mode
