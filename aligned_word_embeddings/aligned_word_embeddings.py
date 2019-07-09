@@ -2,15 +2,12 @@
 
 """Main module."""
 from gensim.models.word2vec import Word2Vec, LineSentence, PathLineSentences
-from gensim import utils, matutils
-
+from gensim import utils
 import os
 import numpy as np
 import glob
 import logging
 import copy
-
-gvocab = None
 
 
 def most_similar_from_model(word, model_start, model_to, topn=10):
@@ -25,15 +22,10 @@ def most_similar_from_model(word, model_start, model_to, topn=10):
     vector = model_start[word]
     return model_to.most_similar([vector], topn=topn)
 
-
-def my_rule(word, count, min_count):
-    if word in gvocab:
-        return utils.RULE_KEEP
-    else:
-        return utils.RULE_DISCARD
-
-
-class AlignedWordEmbeddings():
+class AlignedWordEmbeddings:
+    """
+    Handles alignment between multiple slices of text
+    """
     def __init__(self, size=100, sg=0, siter=5, diter=5, ns=10, window=5, alpha=0.025,
                             min_count=5, workers=2, train = "train", test = "test", opath="model", init_mode="hidden"):
         """
@@ -57,6 +49,7 @@ class AlignedWordEmbeddings():
         """
         self.size = size
         self.sg =sg
+        self.gvocab = []
         self.static_iter = siter
         self.dynamic_iter =diter
         self.negative = ns
@@ -97,13 +90,24 @@ class AlignedWordEmbeddings():
         model.iter = self.dynamic_iter
         return model
 
+    def internal_trimming_rule(self, word):
+        """
+        Internal rule used to trim words
+        :param word:
+        :return:
+        """
+        if word in self.gvocab:
+            return utils.RULE_KEEP
+        else:
+            return utils.RULE_DISCARD
+
     def train_model(self, sentences):
         model = None
         if self.compass == None or self.init_mode != "copy":
             model = Word2Vec(sg=self.sg, size=self.size, alpha=self.static_alpha, iter=self.static_iter,
                              negative=self.negative,
                              window=self.window, min_count=self.min_count, workers=self.workers)
-            model.build_vocab(sentences, trim_rule=my_rule if self.compass != None else None)
+            model.build_vocab(sentences, trim_rule=self.internal_trimming_rule if self.compass != None else None)
         if self.compass != None:
             model = self.initialize_from_compass(model)
         model.train(sentences, total_words=sum([len(s) for s in sentences]), epochs=model.iter, compute_loss=True)
@@ -122,8 +126,8 @@ class AlignedWordEmbeddings():
                 print("Compass will be overwritten")
             self.compass = self.train_model(sentences)
             self.compass.save(os.path.join(self.opath, "compass.model"))
-        global gvocab
-        gvocab = self.compass.wv.vocab
+
+        self.gvocab = self.compass.wv.vocab
 
     def train_slice(self, slice_text, save=True):
         if self.compass == None:
