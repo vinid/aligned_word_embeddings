@@ -83,6 +83,8 @@ class AlignedWordEmbeddings():
         if self.init_mode == "copy":
             model = copy.deepcopy(self.compass)
         else:
+            if self.compass.layer1_size != self.size:
+                return Exception("Compass and Slice have different vector sizes")
             vocab_m = model.wv.index2word
             indices = [self.compass.wv.vocab[w].index for w in vocab_m]
             new_syn1neg = np.array([self.compass.syn1neg[index] for index in indices])
