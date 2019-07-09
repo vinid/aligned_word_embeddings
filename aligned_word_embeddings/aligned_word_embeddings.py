@@ -107,16 +107,19 @@ class AlignedWordEmbeddings():
         model.train(sentences, total_words=sum([len(s) for s in sentences]), epochs=model.iter, compute_loss=True)
         return model
 
-    def train_static(self, compass_text):
-        if os.path.isfile(os.path.join(self.opath, "static.model")):
-            self.compass = Word2Vec.load(os.path.join(self.opath, "static.model"))
-            print("Static model loaded.")
+    def train_compass(self, compass_text, overwrite=False):
+        compass_exists = os.path.isfile(os.path.join(self.opath, "compass.model"))
+        if compass_exists and overwrite is False:
+            self.compass = Word2Vec.load(os.path.join(self.opath, "compass.model"))
+            print("Compass loaded from file.")
         else:
             sentences = PathLineSentences(compass_text)
             sentences.input_files = [s for s in sentences.input_files if not os.path.basename(s).startswith('.')]
-            print("Training static embeddings.")
+            print("Training the compass.")
+            if compass_exists:
+                print("Compass will be overwritten")
             self.compass = self.train_model(sentences)
-            self.compass.save(os.path.join(self.opath, "static.model"))
+            self.compass.save(os.path.join(self.opath, "compass.model"))
         global gvocab
         gvocab = self.compass.wv.vocab
 
@@ -135,7 +138,7 @@ class AlignedWordEmbeddings():
         mods = []
         vocab_len = -1
         for fn in sorted(mfiles):
-            if "static" in os.path.basename(fn): continue
+            if "compass" in os.path.basename(fn): continue
             m = Word2Vec.load(fn)
             m.cbow_mean = True
             m.negative = self.negative

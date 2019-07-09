@@ -41,17 +41,17 @@ How To Use
 
 .. code-block:: python
 
-    from aligned_word_embeddings import aligned_word_embeddings
-
+    from aligned_word_embeddings.aligned_word_embeddings import  AlignedWordEmbeddings, most_similar_from_model
     from gensim.models.word2vec import Word2Vec
-    kd = aligned_word_embeddings.AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
 
-    kd.train_static("compass_text")
+    aligner = AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
 
-    slice_one = kd.train_slice("slice_one", save=True)
-    slice_two = kd.train_slice("slice_two", save=True)
+    aligner.train_compass("/path/to/compass_text")
 
-    print(aligned_word_embeddings.most_similar_from_model("flat", silce_one, slice_two)) 
+    slice_one = aligner.train_slice("/path/to/slice_one.txt", save=True)
+    slice_two = aligner.train_slice("/path/to/slice_two.txt", save=True)
+
+    print(most_similar_from_model("flat", silce_one, slice_two))
 
     slice_one = Word2Vec.load("model/slice_one.model") # model loading with gensim
     slice_two = Word2Vec.load("model/slice_one.model")
