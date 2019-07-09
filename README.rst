@@ -51,6 +51,8 @@ How To Use
     slice_one = kd.train_slice("slice_one", save=True)
     slice_two = kd.train_slice("slice_two", save=True)
 
+    print(aligned_word_embeddings.most_similar_from_model("flat", silce_one, slice_two)) 
+
     slice_one = Word2Vec.load("model/slice_one.model") # model loading with gensim
     slice_two = Word2Vec.load("model/slice_one.model")
 

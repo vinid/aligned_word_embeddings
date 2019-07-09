@@ -37,7 +37,7 @@ class AlignedWordEmbeddings():
     def __init__(self, size=100, sg=0, siter=5, diter=5, ns=10, window=5, alpha=0.025,
                             min_count=5, workers=2, train = "train", test = "test", opath="model", init_mode="hidden"):
         """
-        
+
         :param size: Number of dimensions. Default is 100.
         :param sg: Neural architecture of Word2vec. Default is CBOW (). If 1, Skip-gram is employed.
         :param siter: Number of static iterations (epochs). Default is 5.
