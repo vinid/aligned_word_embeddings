@@ -41,7 +41,8 @@ How To Use
 
 .. code-block:: python
 
-    from aligned_word_embeddings.aligned_word_embeddings import  AlignedWordEmbeddings, most_similar_from_model
+    from aligned_word_embeddings.aligned_word_embeddings import  AlignedWordEmbeddings
+    from aligned_word_embeddings.spatial.distances import most_similar_from_model
     from gensim.models.word2vec import Word2Vec
 
     aligner = AlignedWordEmbeddings(size=30, siter=10, diter=10, workers=4)
