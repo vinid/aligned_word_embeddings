@@ -59,6 +59,27 @@ How To Use
 
 
 
+
+..
+
+.. code-block:: python
+
+    from aligned_word_embeddings.utils.visualization import visualize_embeddings
+
+    model1 = Word2Vec.load("slice_one.model")
+    model2 = Word2Vec.load("slice_two.model")
+
+    import numpy as np
+    models = [model1, model2]
+
+    names = ["slice_one", "slice_two"]
+
+    key = "word"
+
+    visualize_embeddings(key, models, names, topn=2)
+
+..
+
 Credits
 -------
 

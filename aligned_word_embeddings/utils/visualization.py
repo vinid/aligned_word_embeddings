@@ -3,11 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.decomposition import PCA
 
-
-
-def visualize_embeddings(models, names, topn=5):
-
-    key = "dbr:Yugoslavia"
+def visualize_embeddings(key, models, names, topn=5):
     words_in_models = []
     embeddings = []
     for index, model in enumerate(models):
