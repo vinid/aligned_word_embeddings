@@ -76,7 +76,7 @@ class AlignedWordEmbeddings:
         model.iter = self.dynamic_iter
         return model
 
-    def internal_trimming_rule(self, word):
+    def internal_trimming_rule(self, word, count, min_count):
         """
         Internal rule used to trim words
         :param word:
