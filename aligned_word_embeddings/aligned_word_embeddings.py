@@ -36,6 +36,7 @@ class AlignedWordEmbeddings:
         """
         self.size = size
         self.sg =sg
+        self.trained_slices = dict()
         self.gvocab = []
         self.static_iter = siter
         self.dynamic_iter =diter
@@ -121,9 +122,15 @@ class AlignedWordEmbeddings:
         print("Training temporal embeddings: slice {}.".format(slice_text))
         sentences = LineSentence(slice_text)
         model = self.train_model(sentences)
+
+        model_name = os.path.basename(slice_text)[0]
+
+        self.trained_slices[model_name] = model
+
         if save:
-            model.save(os.path.join(self.opath, os.path.splitext(os.path.basename(slice_text))[0]) + ".model")
-        return model
+            model.save(os.path.join(self.opath, os.path.splitext(model_name)) + ".model")
+
+        return self.trained_slices[model_name]
 
     def evaluate(self):
         mfiles = glob.glob(self.opath + '/*.model')

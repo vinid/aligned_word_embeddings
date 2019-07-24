@@ -3,18 +3,22 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.decomposition import PCA
 
-def visualize_embeddings(key, models, names, topn=5):
+def visualize_embeddings(key, models, names, filtering_function, topn=5):
     words_in_models = []
     embeddings = []
     for index, model in enumerate(models):
-        print(index)
+
         words_in_model = []
-        # finding words-embeddings
+
         words_in_model.append(key + "_" + names[index])
         embeddings.append(model.wv[key])
 
-        local_words = [k[0] for k in model.wv.most_similar(key, topn=30)]
-        local_words = list(filter(lambda x : x[0:4] == "dbr:", local_words))[0:topn]
+        local_words = [k[0] for k in model.wv.most_similar(key, topn=50)]
+
+        if filtering_function:
+            local_words = list(filtering_function(local_words))
+
+        local_words = local_words[0:topn]
 
         for similar_word in local_words:
 
