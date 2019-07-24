@@ -30,6 +30,7 @@ class SWEAT:
             sum_1 = sum(modscore_two)
 
             score = sum(modscore_one) - sum(modscore_two)
+            eff_size = (np.mean(modscore_one) - np.mean(modscore_two)) / np.std(assoc_scores)
 
             if abs(sum_0) < 1e-3: print("Warning: Model1 is neutral")
             if abs(sum_1) < 1e-3: print("Warning: Model2 is neutral")
@@ -47,7 +48,7 @@ class SWEAT:
 
             pval = 1 - (over / n)
 
-            return round(score, 4), round(pval, 4)
+            return round(score, 4), round(eff_size,4), round(pval, 4)
         else:
             raise NotImplementedError
 
