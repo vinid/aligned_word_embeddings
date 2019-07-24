@@ -39,6 +39,8 @@ Note
 How To Use
 ----------
 
+* Train
+
 .. code-block:: python
 
     from aligned_word_embeddings.aligned_word_embeddings import  AlignedWordEmbeddings
@@ -62,6 +64,8 @@ How To Use
 
 ..
 
+* Load and Visualize
+
 .. code-block:: python
 
     from aligned_word_embeddings.utils.visualization import visualize_embeddings
@@ -78,6 +82,34 @@ How To Use
 
     visualize_embeddings(key, models, names, topn=2)
 
+..
+
+* Moral Embeddings
+
+.. code-block::python
+
+    from aligned_word_embeddings.datasets import moral
+    from sklearn import linear_model
+    from sklearn import preprocessing
+    import numpy as np
+
+    md = moral.MFDataset("MFD2.0.dic")
+
+    X, y = md.get_moral(slice_one, "care")
+
+
+    model = linear_model.LinearRegression()
+    model.fit(X, y)
+
+    def test_some_words_in_model(words, model):
+        print("---------")
+        for word in words:
+            vv = preprocessing.normalize(np.array([slice_one.wv[word]]), norm="l2")
+            vv = vv[0]
+            print(word, model.predict(np.array([vv]))[0])
+            print("---------")
+
+    test_some_words_in_model(["boris"], model)
 ..
 
 Credits
