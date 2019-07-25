@@ -42,8 +42,10 @@ class SWEAT:
             sum_1 = sum(modscore_two)
 
             score = sum(modscore_one) - sum(modscore_two)
-            eff_size = (np.mean(modscore_one) - np.mean(modscore_two)) / np.std(assoc_scores)
-
+            
+            pool_std = np.sqrt( (np.std(modscore_one)**2 + np.std(modscore_two)**2)/2  )
+            eff_size = (np.mean(modscore_one) - np.mean(modscore_two)) / pool_std
+            
             if abs(sum_0) < 1e-3: print("Warning: %s is neutral" % self.names['X1'])
             if abs(sum_1) < 1e-3: print("Warning: %s is neutral" % self.names['X2'])
 
