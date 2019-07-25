@@ -110,7 +110,7 @@ class AlignedWordEmbeddings:
             sentences.input_files = [s for s in sentences.input_files if not os.path.basename(s).startswith('.')]
             print("Training the compass.")
             if compass_exists:
-                print("Compass will be overwritten")
+                print("Compass will be overwritten after training")
             self.compass = self.train_model(sentences)
             self.compass.save(os.path.join(self.opath, "compass.model"))
 
@@ -120,15 +120,16 @@ class AlignedWordEmbeddings:
         if self.compass == None:
             return Exception("Missing Compass")
         print("Training temporal embeddings: slice {}.".format(slice_text))
+
         sentences = LineSentence(slice_text)
         model = self.train_model(sentences)
 
-        model_name = os.path.basename(slice_text)[0]
+        model_name = os.path.splitext(os.path.basename(slice_text))[0]
 
         self.trained_slices[model_name] = model
 
         if save:
-            model.save(os.path.join(self.opath, os.path.splitext(model_name)) + ".model")
+            model.save(os.path.join(self.opath, model_name + ".model"))
 
         return self.trained_slices[model_name]
 
