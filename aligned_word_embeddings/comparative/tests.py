@@ -2,17 +2,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class SWEAT:
-    def __init__(self, model_1, model_2, A, B):
+    def __init__(self, model_1, model_2, A, B, names=None):
         self.model_1 = model_1
         self.model_2 = model_2
         self.A = A
         self.B = B
+        
+        self.names = {"X1":"X1",
+                      "X2":"X2",
+                      "A" : "A",
+                      "B" : "B"}
+        
+        if names is not None:
+            if type(names) != dict: 
+                raise RuntimeError("Names parameter must be dictionary")
+            if list(names.keys()) != ["X1","X2","A","B"]: 
+                raise RuntimeError('Names dictionary keys must be ["X1","X2","A","B"] ')
+            self.names = names
 
     def word_assoc(self, model, w):
         return np.mean([model.wv.similarity(w, a) for a in self.A]) - np.mean([model.wv.similarity(w, b) for b in self.B])
 
 
-    def test(self, X, n=10000, same=True, two_tails=True):
+    def test(self, X, n=10000, same=True, two_tails=True, verbose=False):
         """
         :param X:
         :param n:
@@ -32,8 +44,8 @@ class SWEAT:
             score = sum(modscore_one) - sum(modscore_two)
             eff_size = (np.mean(modscore_one) - np.mean(modscore_two)) / np.std(assoc_scores)
 
-            if abs(sum_0) < 1e-3: print("Warning: Model1 is neutral")
-            if abs(sum_1) < 1e-3: print("Warning: Model2 is neutral")
+            if abs(sum_0) < 1e-3: print("Warning: %s is neutral" % self.names['X1'])
+            if abs(sum_1) < 1e-3: print("Warning: %s is neutral" % self.names['X2'])
 
             # permutation test
             ds = []
@@ -47,7 +59,15 @@ class SWEAT:
                 over = sum([d <= score for d in ds])
 
             pval = 1 - (over / n)
-
+            
+            if verbose:
+                if score <0: 
+                    print("%s ~ %s" % (self.names['X1'],self.names["B"]) )
+                    print("%s ~ %s" % (self.names['X2'],self.names["A"]) )
+                elif score >0:
+                    print("%s ~ %s" %(self.names['X1'],self.names["A"]) )
+                    print("%s ~ %s" %(self.names['X2'],self.names["B"]) )
+            
             return round(score, 4), round(eff_size,4), round(pval, 4)
         else:
             raise NotImplementedError
@@ -108,21 +128,19 @@ class SWEAT:
 
             # plot setup & cosmetics
             ax.set_yticks(list(range(0, 2 * len(X), 2)) + [-2])
-            ax.set_yticklabels(X + ['Cumulative'])
+            ax.set_yticklabels(X)
 
             if names is None:
-                labels = ["A", "B"]
+                labels = [self.names['A'], self.names['B']]
             else:
                 labels = [names['A'], names['B']]
             ax.legend(handles=[boxA['boxes'][0], boxB['boxes'][0]], labels=labels)
 
             ax.axvline(0, lw=1, ls='--', alpha=0.3, color='k')
             ax.set_xlim(-1, 1)
-            #ax.set_ylim(-3, (2 * len(X)))
             ax.set_xlabel('cosine similarity')
-            #ax.axhline(-1, color='black', lw=1)
             if names is None:
-                ax.set_title("model %s" % i)
+                ax.set_title(self.names['X%s'%(i+1)])
             else:
                 ax.set_title(names['models'][i])
 
@@ -139,8 +157,8 @@ class SWEAT:
                 ]
         
         title=None
-        attr_labels = ["A", "B"]
-        mod_labels = ["X1","X2"]
+        attr_labels = [self.names["A"], self.names["B"]]
+        mod_labels = [self.names["X1"],self.names["X2"]]
         bar_cols = ['#e15759','#4e79a7']
         dot_cols = ['black','white']
         
