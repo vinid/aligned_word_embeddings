@@ -122,12 +122,9 @@ class SWEAT:
                 ax.arrow(muA, 2 * j, -dAB, 0,
                          head_width=0.15, head_length=0.02, lw=1.5, length_includes_head=True, color='black'
                          )
-            # cumulative arrow
-            #ax.arrow(0, -2, -sum(S), 0,
-            #         head_width=0.2, head_length=0.02, lw=3, length_includes_head=True, color='black')
 
             # plot setup & cosmetics
-            ax.set_yticks(list(range(0, 2 * len(X), 2)) + [-2])
+            ax.set_yticks(list(range(0, 2 * len(X), 2)))
             ax.set_yticklabels(X)
 
             if names is None:
@@ -195,7 +192,7 @@ class SWEAT:
         
         plt.legend(handles=handles[:3],labels=labels[:3])
         plt.axvline(0,lw=1,color='k',alpha=0.5)
-        plt.xlabel("Cumulative similarity")
+        plt.xlabel("Cumulative association")
         plt.yticks(range(len(deltas)),mod_labels)    
         if title is not None:
             plt.title(title)
