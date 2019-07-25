@@ -56,8 +56,6 @@ class SWEAT:
         """ Plot SWEAT associations for target terms X wrt polarization sets A&B for models slices
             - models: gensim models
             - X: target terms (strings)
-            - A: first attribute terms list (strings)
-            - B: second attribute terms list (strings)
             - names: dictionary for plot labels
         """
 
@@ -105,8 +103,8 @@ class SWEAT:
                          head_width=0.15, head_length=0.02, lw=1.5, length_includes_head=True, color='black'
                          )
             # cumulative arrow
-            ax.arrow(0, -2, -sum(S), 0,
-                     head_width=0.2, head_length=0.02, lw=3, length_includes_head=True, color='black')
+            #ax.arrow(0, -2, -sum(S), 0,
+            #         head_width=0.2, head_length=0.02, lw=3, length_includes_head=True, color='black')
 
             # plot setup & cosmetics
             ax.set_yticks(list(range(0, 2 * len(X), 2)) + [-2])
@@ -120,12 +118,67 @@ class SWEAT:
 
             ax.axvline(0, lw=1, ls='--', alpha=0.3, color='k')
             ax.set_xlim(-1, 1)
-            ax.set_ylim(-3, (2 * len(X)))
+            #ax.set_ylim(-3, (2 * len(X)))
             ax.set_xlabel('cosine similarity')
-            ax.axhline(-1, color='black', lw=1)
+            #ax.axhline(-1, color='black', lw=1)
             if names is None:
                 ax.set_title("model %s" % i)
             else:
                 ax.set_title(names['models'][i])
 
+        plt.show()
+
+    def plot_cumulative(self, X, names=None):
+        """ Plot cumulative SWEAT associations for target terms X
+        """
+        deltas = [
+                    [
+                        np.mean([m.wv.similarity(w, a) for a in self.A]) - np.mean([m.wv.similarity(w, b) for b in self.B])
+                         for w in X
+                    ] for m in [self.model_1, self.model_2]
+                ]
+        
+        title=None
+        attr_labels = ["A", "B"]
+        mod_labels = ["X1","X2"]
+        bar_cols = ['#e15759','#4e79a7']
+        dot_cols = ['black','white']
+        
+        if names is not None:
+            if "Title" in names.keys(): title = names['Title']
+            if "Attributes" in names.keys(): attr_labels = names['Attributes']
+            if "Models" in names.keys(): mod_labels = names["Models"]
+            if "Bar Colors" in names.keys(): bar_cols = names["Bar Colors"]
+            if "Dot Colors" in names.keys(): dot_cols = names["Dot Colors"]
+        
+        plt.figure(figsize=(7,2))
+        
+        xl = 0
+        
+        for i, s_mod in enumerate(deltas):
+            
+            cumulative = sum(s_mod)
+            
+            pos = sum([x for x in s_mod if x > 0])
+            neg = sum([x for x in s_mod if x < 0])
+
+            plt.broken_barh([ (0,pos) ], yrange=(i-0.4, 0.8), facecolors=(bar_cols[0]) , label=attr_labels[0])
+            plt.broken_barh([ (neg,abs(neg))], yrange=(i-0.4, 0.8), facecolors=(bar_cols[1]), label=attr_labels[1] )
+            
+            plt.scatter([cumulative],[i],facecolor=dot_cols[0],edgecolor=dot_cols[1], label='sum')
+            
+            xl = max(xl,max(abs(pos),abs(neg)))
+
+            
+        xl += xl/10
+        plt.xlim(-xl,xl)
+        
+        handles, labels = plt.gca().get_legend_handles_labels()
+        
+        plt.legend(handles=handles[:3],labels=labels[:3])
+        plt.axvline(0,lw=1,color='k',alpha=0.5)
+        plt.xlabel("Cumulative similarity")
+        plt.yticks(range(len(deltas)),mod_labels)    
+        if title is not None:
+            plt.title(title)
         plt.show()
