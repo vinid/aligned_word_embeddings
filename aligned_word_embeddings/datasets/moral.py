@@ -56,7 +56,7 @@ class MFDataset:
                     X.append(word_vector)
                     y.append(np.array([0]))
 
-        warnings.warn("Warning, missing" + str(missing) + " words")
+        warnings.warn("Warning, missing " + str(missing) + " words")
         if normalize:
             X = preprocessing.normalize(np.array(X), norm='l2')
 
@@ -105,7 +105,7 @@ class MoralStrength:
             val = row["EXPRESSED_MORAL"]
             val = (val - 1) / (9 - 1)
             y.append(np.array(val))
-        warnings.warn("Warning, missing" + str(missing) + " words")
+        warnings.warn("Warning, missing " + str(missing) + " words")
 
         X = np.array(X)
         if normalize:

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.decomposition import PCA
 
-def visualize_embeddings(key, models, names, filtering_function, topn=5):
+def visualize_embeddings(key, models, names, filtering_function = None, topn=5):
     words_in_models = []
     embeddings = []
     for index, model in enumerate(models):
