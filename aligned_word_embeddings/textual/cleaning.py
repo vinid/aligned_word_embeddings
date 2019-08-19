@@ -9,7 +9,7 @@ class TextCleaner:
     """
     def __init__(self, language):
         self.language = language
-        self.stopwords = stopwords.words(language=self.language)
+        self.stopwords = stopwords.words(self.language)
 
     def cleaning_text(self, text):
         cleaning_text  = word_tokenize(text)
