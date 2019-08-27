@@ -103,5 +103,5 @@ def model_deltas(mod_a,mod_b):
     :param mod_b:
     :return:
     """
-    intersection = set(mod_a.wv.vocab.keys()).intersection(set(mod_b.wv.vocab.keys()))
-    return { w: model_one.wv[w] - model_two.wv[w] for w in intersect}
+    intersect = set(mod_a.wv.vocab.keys()).intersection(set(mod_b.wv.vocab.keys()))
+    return { w: mod_a.wv[w] - mod_b.wv[w] for w in intersect}
