@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+from spm1d.stats import hotellings2
 
 _MEASURES = ["jaccard", "count", "raw"]
 
@@ -93,7 +94,7 @@ def parse_lexicon(model, lexicon, sanitize=True):
     else:
         present = lexicon
     
-    return [model.wv[w] for w in present.keys()], list(present.values())
+    return np.array([model.wv[w] for w in present.keys()]), np.array(list(present.values()))
 
 
 def model_deltas(mod_a,mod_b):
@@ -105,3 +106,20 @@ def model_deltas(mod_a,mod_b):
     """
     intersect = set(mod_a.wv.vocab.keys()).intersection(set(mod_b.wv.vocab.keys()))
     return { w: mod_a.wv[w] - mod_b.wv[w] for w in intersect}
+
+def hotelling_lexicon(model, lexicon, alpha = 0.01):
+    
+    if len(lexicon.positive) < model.vector_size or len(lexicon.negative) < model.vector_size:
+        raise RuntimeError("Lexicon cardianality too small for model: %s < %s" % 
+                           (min(len(lexicon.positive),len(lexicon.negative)), model.vector_size ) )
+    
+    X1, y = parse_lexicon(model,lexicon.positive)
+    X2, y = parse_lexicon(model,lexicon.negative)
+
+    
+    test = hotellings2(X1, X2)
+    inference = test.inference(alpha)
+    print("H0: Lexicon polarities have same means in model")
+    print("H1: Lexicon polarities have different means in model")
+    print("Reject H0 for H1: %s" %inference.h0reject)
+    return inference.h0reject
