@@ -107,8 +107,16 @@ def model_deltas(mod_a,mod_b):
     intersect = set(mod_a.wv.vocab.keys()).intersection(set(mod_b.wv.vocab.keys()))
     return { w: mod_a.wv[w] - mod_b.wv[w] for w in intersect}
 
-def hotelling_lexicon(model, lexicon, alpha = 0.01):
-    
+def lexicon_polarity(model, lexicon, alpha = 0.05, verbose=True):
+    """
+    Tests equality of lexicon polarity means according to embedding model.
+    Returns statistical test outcome against null hypothesis of equal means at given alpha value.
+    :param model:
+    :param lexicon:
+    :param alpha:
+    :param verbose:
+    :return:
+    """
     if len(lexicon.positive) < model.vector_size or len(lexicon.negative) < model.vector_size:
         raise RuntimeError("Lexicon cardianality too small for model: %s < %s" % 
                            (min(len(lexicon.positive),len(lexicon.negative)), model.vector_size ) )
@@ -119,7 +127,98 @@ def hotelling_lexicon(model, lexicon, alpha = 0.01):
     
     test = hotellings2(X1, X2)
     inference = test.inference(alpha)
-    print("H0: Lexicon polarities have same means in model")
-    print("H1: Lexicon polarities have different means in model")
-    print("Reject H0 for H1: %s" %inference.h0reject)
+    if verbose: print("H0: Lexicon polarities have same means in model")
+    if verbose: print("H1: Lexicon polarities have different means in model")
+    if verbose: print("Reject H0 for H1: %s" %inference.h0reject)
     return inference.h0reject
+
+def lexicon_stability(aligned, lexicon, mode='s2c', alpha=0.05, verbose=True):
+    #WIP
+    """
+    Tests equality of lexicon polarity means during alignement.
+    Two operation mode: slice-vs-slice (s2s) or slice-vs-compass (s2c)
+    Returns statistical test outcome against null hypothesis of equal means at given alpha value.
+    :param aligned:
+    :param lexicon:
+    :param mode:
+    :param alpha:
+    :param verbose:
+    :return:
+    """
+    
+    if len(lexicon.positive) < aligned.compass.vector_size or len(lexicon.negative) < aligned.compass.vector_size:
+        raise RuntimeError("Lexicon cardianality too small for model: %s < %s" % 
+                           (min(len(lexicon.positive),len(lexicon.negative)), aligned.compass.vector_size ) )
+    
+    if mode not in ["s2s", "s2c"]:
+        raise RuntimeError("Unkown mode selected, must be either 's2s' or 's2c'")
+    else:
+        results = {}
+        if mode == "s2c":
+            
+            if verbose: 
+                print("Slice-vs-Compass mode selected")
+                print("Detected %s slices" % len(aligned.trained_slices))
+
+            
+            XCP, y = parse_lexicon(aligned.compass,lexicon.positive)
+            XCN, y = parse_lexicon(aligned.compass,lexicon.negative)
+
+            for n,s in aligned.trained_slices.items():
+                
+                XSP, y = parse_lexicon(s,lexicon.positive)
+                XSN, y = parse_lexicon(s,lexicon.negative)
+                
+                testP = hotellings2(XCP, XSP)
+                testN = hotellings2(XCN, XSN)
+                
+                inferenceP = testP.inference(alpha)
+                inferenceN = testN.inference(alpha)
+                
+                results[n+"_pos"] = inferenceP.h0reject
+                results[n+"_neg"] = inferenceN.h0reject
+                
+                if verbose: 
+                    print(n,"H0: Positive Lexicon has same means")
+                    print(n,"H1: Positive Lexicon has different means")
+                    print(n,"Reject H0 for H1: %s" %inferenceP.h0reject)
+                    print()
+                    print(n,"H0: Negative Lexicon has same means")
+                    print(n,"H1: Negative Lexicon has different means")
+                    print(n,"Reject H0 for H1: %s" %inferenceN.h0reject)
+        
+        if mode == "s2s":
+            if verbose: 
+                print("Slice-vs-Compass mode selected")
+                print("Detected %s slices" % len(aligned.trained_slices))
+            
+            
+            for a,b in itertools.combinations(aligned.trained_slices.items()):
+                
+                n = a[0]+"-"+b[0]
+                
+                XAP, y = parse_lexicon(a[1],lexicon.positive)
+                XAN, y = parse_lexicon(a[1],lexicon.negative)
+                
+                XBP, y = parse_lexicon(b[1],lexicon.positive)
+                XBN, y = parse_lexicon(b[1],lexicon.negative)
+                
+                testP = hotellings2(XAP, XBP)
+                testN = hotellings2(XAN, XBN)
+
+                inferenceP = testP.inference(alpha)
+                inferenceN = testN.inference(alpha)
+                
+                results[n+"_pos"] = inferenceP.h0reject
+                results[n+"_neg"] = inferenceN.h0reject
+                
+                if verbose: 
+                    print(n,"H0: Positive Lexicon has same means")
+                    print(n,"H1: Positive Lexicon has different means")
+                    print(n,"Reject H0 for H1: %s" %inferenceP.h0reject)
+                    print()
+                    print(n,"H0: Negative Lexicon has same means")
+                    print(n,"H1: Negative Lexicon has different means")
+                    print(n,"Reject H0 for H1: %s" %inferenceN.h0reject)
+
+    return results
