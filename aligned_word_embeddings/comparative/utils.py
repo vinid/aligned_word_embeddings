@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 from spm1d.stats import hotellings2
+import pickle
 
 _MEASURES = ["jaccard", "count", "raw"]
 
@@ -14,23 +15,23 @@ def vocabulary_overlap(mod_a, mod_b, measure="jaccard"):
     """
     if measure not in _MEASURES:
         raise RuntimeError("Unknown overlap measure [use %s]" % ", ".join(_MEASURES))
-    
+
     if measure == "jaccard":
         voc_a = set( mod_a.wv.vocab.keys() )
         voc_b = set( mod_b.wv.vocab.keys() )
         return len(  voc_a.intersection( voc_b ) ) / len( voc_a.union( voc_b ) )
-    
+
     # A inters B
     if measure == "count":
         voc_a = set( mod_a.wv.vocab.keys() )
         voc_b = set( mod_b.wv.vocab.keys() )
         return len(  voc_a.intersection( voc_b ) )
-    
+
     if measure == "raw":
         voc_a = set( mod_a.wv.vocab.keys() )
         voc_b = set( mod_b.wv.vocab.keys() )
         return voc_a.intersection( voc_b )
-    
+
 def vocabulary_report(aligned, measure="jaccard", internal=False):
     """
     Prints a report of vocabulary overlaps for all trained slices
@@ -43,7 +44,7 @@ def vocabulary_report(aligned, measure="jaccard", internal=False):
     if measure not in _MEASURES:
         raise RuntimeError("Unknown overlap measure [use %s]" % ", ".join(_MEASURES))
     print("Computing %s vocabulary reports"%measure)
-    
+
     if internal:
         for a,b in itertools.combinations(aligned.trained_slices.items()):
             print("%s - %s: " % (a[0],b[0]), vocabulary_overlap(a[1],b[1],measure=measure) )
@@ -93,7 +94,7 @@ def parse_lexicon(model, lexicon, sanitize=True):
         present = {k:lexicon[k] for k in lexicon.keys() if k in model.wv.vocab.keys()}
     else:
         present = lexicon
-    
+
     return np.array([model.wv[w] for w in present.keys()]), np.array(list(present.values()))
 
 
@@ -118,13 +119,13 @@ def lexicon_polarity(model, lexicon, alpha = 0.05, verbose=True):
     :return:
     """
     if len(lexicon.positive) < model.vector_size or len(lexicon.negative) < model.vector_size:
-        raise RuntimeError("Lexicon cardianality too small for model: %s < %s" % 
+        raise RuntimeError("Lexicon cardianality too small for model: %s < %s" %
                            (min(len(lexicon.positive),len(lexicon.negative)), model.vector_size ) )
-    
+
     X1, y = parse_lexicon(model,lexicon.positive)
     X2, y = parse_lexicon(model,lexicon.negative)
 
-    
+
     test = hotellings2(X1, X2)
     inference = test.inference(alpha)
     if verbose: print("H0: Lexicon polarities have same means in model")
@@ -145,40 +146,40 @@ def lexicon_stability(aligned, lexicon, mode='s2c', alpha=0.05, verbose=True):
     :param verbose:
     :return:
     """
-    
+
     if len(lexicon.positive) < aligned.compass.vector_size or len(lexicon.negative) < aligned.compass.vector_size:
-        raise RuntimeError("Lexicon cardianality too small for model: %s < %s" % 
+        raise RuntimeError("Lexicon cardianality too small for model: %s < %s" %
                            (min(len(lexicon.positive),len(lexicon.negative)), aligned.compass.vector_size ) )
-    
+
     if mode not in ["s2s", "s2c"]:
         raise RuntimeError("Unkown mode selected, must be either 's2s' or 's2c'")
     else:
         results = {}
         if mode == "s2c":
-            
-            if verbose: 
+
+            if verbose:
                 print("Slice-vs-Compass mode selected")
                 print("Detected %s slices" % len(aligned.trained_slices))
 
-            
+
             XCP, y = parse_lexicon(aligned.compass,lexicon.positive)
             XCN, y = parse_lexicon(aligned.compass,lexicon.negative)
 
             for n,s in aligned.trained_slices.items():
-                
+
                 XSP, y = parse_lexicon(s,lexicon.positive)
                 XSN, y = parse_lexicon(s,lexicon.negative)
-                
+
                 testP = hotellings2(XCP, XSP)
                 testN = hotellings2(XCN, XSN)
-                
+
                 inferenceP = testP.inference(alpha)
                 inferenceN = testN.inference(alpha)
-                
+
                 results[n+"_pos"] = inferenceP.h0reject
                 results[n+"_neg"] = inferenceN.h0reject
-                
-                if verbose: 
+
+                if verbose:
                     print(n,"H0: Positive Lexicon has same means")
                     print(n,"H1: Positive Lexicon has different means")
                     print(n,"Reject H0 for H1: %s" %inferenceP.h0reject)
@@ -186,33 +187,33 @@ def lexicon_stability(aligned, lexicon, mode='s2c', alpha=0.05, verbose=True):
                     print(n,"H0: Negative Lexicon has same means")
                     print(n,"H1: Negative Lexicon has different means")
                     print(n,"Reject H0 for H1: %s" %inferenceN.h0reject)
-        
+
         if mode == "s2s":
-            if verbose: 
+            if verbose:
                 print("Slice-vs-Compass mode selected")
                 print("Detected %s slices" % len(aligned.trained_slices))
-            
-            
+
+
             for a,b in itertools.combinations(aligned.trained_slices.items()):
-                
+
                 n = a[0]+"-"+b[0]
-                
+
                 XAP, y = parse_lexicon(a[1],lexicon.positive)
                 XAN, y = parse_lexicon(a[1],lexicon.negative)
-                
+
                 XBP, y = parse_lexicon(b[1],lexicon.positive)
                 XBN, y = parse_lexicon(b[1],lexicon.negative)
-                
+
                 testP = hotellings2(XAP, XBP)
                 testN = hotellings2(XAN, XBN)
 
                 inferenceP = testP.inference(alpha)
                 inferenceN = testN.inference(alpha)
-                
+
                 results[n+"_pos"] = inferenceP.h0reject
                 results[n+"_neg"] = inferenceN.h0reject
-                
-                if verbose: 
+
+                if verbose:
                     print(n,"H0: Positive Lexicon has same means")
                     print(n,"H1: Positive Lexicon has different means")
                     print(n,"Reject H0 for H1: %s" %inferenceP.h0reject)
@@ -222,3 +223,24 @@ def lexicon_stability(aligned, lexicon, mode='s2c', alpha=0.05, verbose=True):
                     print(n,"Reject H0 for H1: %s" %inferenceN.h0reject)
 
     return results
+
+
+def dump_awec(dumping_path, awec_object):
+    """
+    saves an awec object using pickle
+    :param dumping_path:
+    :param awec_object:
+    :return:
+    """
+    with open(dumping_path, 'wb') as f:
+        pickle.dump(awec_object, f)
+
+
+def load_awec(loading_path):
+    """
+    loads an awec object using pickle
+    :param loading_path:
+    :return:
+    """
+    with open(loading_path, 'rb') as f:
+        return pickle.load(f)
