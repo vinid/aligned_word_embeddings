@@ -46,7 +46,7 @@ def vocabulary_report(aligned, measure="jaccard", internal=False):
     print("Computing %s vocabulary reports"%measure)
 
     if internal:
-        for a,b in itertools.combinations(aligned.trained_slices.items()):
+        for a,b in itertools.combinations(aligned.trained_slices.items(),2):
             print("%s - %s: " % (a[0],b[0]), vocabulary_overlap(a[1],b[1],measure=measure) )
         return
     else:
@@ -73,7 +73,7 @@ def frequency_report(aligned, internal=False):
     :return:
     """
     if internal:
-        for a,b in itertools.combinations(aligned.trained_slices.items()):
+        for a,b in itertools.combinations(aligned.trained_slices.items(),2):
             print("%s / %s: " % (a[0],b[0]), frequency_rate(a[1],b[1]) )
         return
     else:
@@ -187,14 +187,15 @@ def lexicon_stability(aligned, lexicon, mode='s2c', alpha=0.05, verbose=True):
                     print(n,"H0: Negative Lexicon has same means")
                     print(n,"H1: Negative Lexicon has different means")
                     print(n,"Reject H0 for H1: %s" %inferenceN.h0reject)
+                    print()
 
         if mode == "s2s":
             if verbose:
-                print("Slice-vs-Compass mode selected")
+                print("Slice-vs-Slice mode selected")
                 print("Detected %s slices" % len(aligned.trained_slices))
 
 
-            for a,b in itertools.combinations(aligned.trained_slices.items()):
+            for a,b in itertools.combinations(aligned.trained_slices.items(),2):
 
                 n = a[0]+"-"+b[0]
 
@@ -221,6 +222,7 @@ def lexicon_stability(aligned, lexicon, mode='s2c', alpha=0.05, verbose=True):
                     print(n,"H0: Negative Lexicon has same means")
                     print(n,"H1: Negative Lexicon has different means")
                     print(n,"Reject H0 for H1: %s" %inferenceN.h0reject)
+                    print()
 
     return results
 
