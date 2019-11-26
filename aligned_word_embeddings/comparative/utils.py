@@ -246,3 +246,21 @@ def load_awec(loading_path):
     """
     with open(loading_path, 'rb') as f:
         return pickle.load(f)
+
+
+def zipf(word,wordcounts,d1=None,d2=None):
+    '''
+    Compute zipf frequency measure for given work w.r.t given corpus wordcounts
+    :param word: string
+    :param wordcounts: dictionary with token occurrencies in corpus (e.g. collections.Counter)
+    :param d1: float with total number of token in corpus in millions
+    :param d2: float with number of unique tokes in corpus in millions
+    '''
+    n = (wordcounts[word] + 1)
+    if d1 is None:
+        d1 = sum(wordcounts.values())/1000000
+    if d2 is None:
+        d2 = len(wordcounts.keys())/1000000
+
+    return np.log10( n/(d1+d2) ) + 3
+
