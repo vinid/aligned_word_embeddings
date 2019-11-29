@@ -124,9 +124,10 @@ class SWEAT:
                 dAB = muA - muB
                 S.append(dAB)
 
+		arr_col = "blue" if dAB > 0 else "red"
                 # word arrow
                 ax.arrow(muA, 2 * j, -dAB, 0,
-                         head_width=0.15, head_length=0.02, lw=1.5, length_includes_head=True, color='black'
+                         head_width=0.15, head_length=0.02, lw=1.5, length_includes_head=True, color=arr_col
                          )
 
             # plot setup & cosmetics
