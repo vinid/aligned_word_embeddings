@@ -108,11 +108,15 @@ class SWEAT:
 
                 boxA = ax.boxplot(assA,
                                   positions=[2 * j - 0.3], widths=0.3,
-                                  boxprops=dict(color="red"), vert=False, showmeans=True, meanline=True)
+                                  boxprops=dict(color="red"), vert=False, showmeans=True, meanline=True,
+				  meanprop=dict(color="black",ls="-"),
+				  medianprop=dict(lw=0))
 
                 boxB = ax.boxplot(assB,
                                   positions=[2 * j + 0.3], widths=0.3,
-                                  boxprops=dict(color="blue"), vert=False, showmeans=True, meanline=True)
+                                  boxprops=dict(color="blue"), vert=False, showmeans=True, meanline=True,
+                                  meanprop=dict(color="black",ls="-"),
+                                  medianprop=dict(lw=0))
 
                 # compute means and delta
                 muA = np.mean(assA)
