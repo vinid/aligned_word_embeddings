@@ -109,14 +109,14 @@ class SWEAT:
                 boxA = ax.boxplot(assA,
                                   positions=[2 * j - 0.3], widths=0.3,
                                   boxprops=dict(color="red"), vert=False, showmeans=True, meanline=True,
-				  meanprop=dict(color="black",ls="-"),
-				  medianprop=dict(lw=0))
+				  meanprops=dict(color="black",ls="-"),
+				  medianprops=dict(lw=0))
 
                 boxB = ax.boxplot(assB,
                                   positions=[2 * j + 0.3], widths=0.3,
                                   boxprops=dict(color="blue"), vert=False, showmeans=True, meanline=True,
-                                  meanprop=dict(color="black",ls="-"),
-                                  medianprop=dict(lw=0))
+                                  meanprops=dict(color="black",ls="-"),
+                                  medianprops=dict(lw=0))
 
                 # compute means and delta
                 muA = np.mean(assA)
@@ -124,7 +124,8 @@ class SWEAT:
                 dAB = muA - muB
                 S.append(dAB)
 
-		arr_col = "blue" if dAB > 0 else "red"
+                arr_col = "blue" if (dAB < 0) else "red"
+
                 # word arrow
                 ax.arrow(muA, 2 * j, -dAB, 0,
                          head_width=0.15, head_length=0.02, lw=1.5, length_includes_head=True, color=arr_col

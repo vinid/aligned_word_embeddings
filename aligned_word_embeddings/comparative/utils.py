@@ -264,3 +264,11 @@ def zipf(word,wordcounts,d1=None,d2=None):
 
     return np.log10( n/(d1+d2) ) + 3
 
+def corresp_transpose(word, mod_a, mod_b, reverse=False):
+    if reverse:
+        mod_a, mod_b = mod_b ,mod_a
+    try:
+        assert word in mod_a.wv.vocab.keys()
+    except:
+        return None
+    return mod_b.wv.most_similar([mod_a.wv[word] ], topn=1 )[0][0]
