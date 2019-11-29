@@ -63,14 +63,14 @@ class SWEAT:
             pval = 1 - (over / n)
             
             if verbose:
-                if score <0: 
+                if score <0:
                     print("%s ~ %s" % (self.names['X1'],self.names["B"]) )
                     print("%s ~ %s" % (self.names['X2'],self.names["A"]) )
                 elif score >0:
                     print("%s ~ %s" %(self.names['X1'],self.names["A"]) )
                     print("%s ~ %s" %(self.names['X2'],self.names["B"]) )
             
-            return round(score, 4), round(eff_size,4), round(pval, 4)
+            return {"score":round(score, 4), "eff_size":round(eff_size,4), "p-val" :round(pval, 4)}
         else:
             raise NotImplementedError
 
