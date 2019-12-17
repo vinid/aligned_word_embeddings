@@ -1,11 +1,11 @@
 import itertools
 import numpy as np
+from numpy.linalg import norm
 from spm1d.stats import hotellings2
 import pickle
 import pandas as pd
 import itertools
 from collections import Counter
-
 
 _MEASURES = ["jaccard", "count", "raw"]
 
@@ -285,7 +285,7 @@ def augment_single(word, model, n=1, m=1000, sample=True):
         p = []
         curr = seed
         for _ in range(m):
-            step = np.random.normal(size=(100))
+            step = np.random.normal(size=(model.vector_size))
             step /= norm(step)
 
             curr = curr + step
@@ -307,7 +307,7 @@ def augment_multi(word, models, n=1, m=1000, sample=True):
         p = []
         curr = seed
         for _ in range(m):
-            step = np.random.normal(size=(100))
+            step = np.random.normal(size=(models[0].vector_size))
             step /= norm(step)
 
             curr = curr + step
