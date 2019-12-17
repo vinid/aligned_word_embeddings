@@ -2,6 +2,10 @@ import itertools
 import numpy as np
 from spm1d.stats import hotellings2
 import pickle
+import pandas as pd
+import itertools
+from collections import Counter
+
 
 _MEASURES = ["jaccard", "count", "raw"]
 
@@ -272,3 +276,104 @@ def corresp_transpose(word, mod_a, mod_b, reverse=False):
     except:
         return None
     return mod_b.wv.most_similar([mod_a.wv[word] ], topn=1 )[0][0]
+
+def augment_single(word, model, n=1, m=1000, sample=True):
+    '''Data augmentation inside single model'''
+    synth = []
+    seed = model.wv[word]
+    for _ in range(n):
+        p = []
+        curr = seed
+        for _ in range(m):
+            step = np.random.normal(size=(100))
+            step /= norm(step)
+
+            curr = curr + step
+
+            if model.wv.most_similar([curr], topn=1)[0][0] == word:
+                p.append(curr)
+            else:
+                break
+        if sample: p = p[np.random.choice(range(len(p)))]
+        synth.append(p)
+    return np.array(synth)
+
+
+def augment_multi(word, models, n=1, m=1000, sample=True):
+    '''Data augmentation across multiple models'''
+    synth = []
+    seed = np.mean(np.vstack( [mods.wv[word] for mods in models]),axis=0)
+    for _ in range(n):
+        p = []
+        curr = seed
+        for _ in range(m):
+            step = np.random.normal(size=(100))
+            step /= norm(step)
+
+            curr = curr + step
+
+            if all([mods.wv.most_similar([curr], topn=1)[0][0] == word for mods in models]):
+                p.append(curr)
+            else:
+                break
+        if sample: p = p[np.random.choice(range(len(p)))]
+        synth.append(p)
+
+    return np.array(synth)
+
+
+def vocabulary_dataframe(corpora, verbose=False, filter_common = True, min_count=5):
+    '''Build zipf dataframe for corpora'''
+    # build zipf dicts
+    wordzipfers = {}
+    for f in corpora:
+        name = f.split("/")[-1][:-4]
+        with codecs.open(f) as fin:
+            wc = Counter(fin.read().split())
+        if verbose: print("count",name)
+        
+        # filter on min_count frequency
+        if min_count:
+            wc = {x : wc[x] for x in wc if wc[x] >= min_count}
+            if verbose: print("min_count",name)
+
+        
+        d1 = sum(wc.values())/1000000
+        d2 = len(wc.keys())/1000000
+        wordzipfers[name] = { word:zipf(word,wc,d1,d2) for word in wc.keys()}
+        if verbose: print("zipf",name)
+        del wc
+        
+    # build dataframe of zipfs
+    df = pd.DataFrame({"zipf %s" % (k) :v for k,v in wordzipfers.items()})
+
+    if verbose: print("dataframe done")    
+    
+    # filter on shared vocab
+    if filter_common:
+        shared = None
+        for k in wordzipfers.keys():
+            if not shared:
+                shared = set(wordzipfers[k].keys())
+            else:
+                shared = shared.intersection(set(wordzipfers[k].keys()))
+        df = df.filter(shared,axis=0)
+        if verbose: print("common filter done")
+    
+    return df
+
+
+def comparative_dataframe(models, corpora, min_count = 5, filter_common = True, verbose = True):
+    ''' Build comparative dataframe for multiple models'''
+    names = [f.split("/")[-1][:-4] for f in corpora]
+
+    if len(models)!=len(corpora):
+        raise RuntimeError("models and corpora must be same length")
+
+    df = vocabulary_dataframe(corpora, verbose=verbose, filter_common = filter_common, min_count=min_count)
+
+    for i, j in itertools.permutations(range(len(models)),2):
+        df['Corr %s2%s' %(names[i],names[j])] = [ corresp_transpose(x,models[i],models[j]) for x in df.index ]
+        df['Corr %s2%s' %(names[j],names[i])] = [ corresp_transpose(x, models[i],models[j],reverse=True) for x in df.index ]
+
+    return df
