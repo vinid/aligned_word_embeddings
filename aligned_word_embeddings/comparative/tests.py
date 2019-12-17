@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 
 class SWEAT:
     def __init__(self, model_1, model_2, A, B, names=None):
@@ -20,8 +21,13 @@ class SWEAT:
                 raise RuntimeError('Names dictionary keys must be ["X1","X2","A","B"] ')
             self.names = names
 
-    def word_assoc(self, model, w):
-        return np.mean([model.wv.similarity(w, a) for a in self.A]) - np.mean([model.wv.similarity(w, b) for b in self.B])
+    def word_assoc(self, model, w, test=False):
+        assocs_A = [model.wv.similarity(w, a) for a in self.A]
+        assocs_B = [model.wv.similarity(w, b) for b in self.B]
+        if test:
+            return stats.ttest_rel(assocs_A,assocs_B)
+        else:
+            return np.mean(assocs_A) - np.mean(assocs_B)
 
 
     def test(self, X, n=10000, same=True, two_tails=True, verbose=False):
@@ -74,7 +80,7 @@ class SWEAT:
         else:
             raise NotImplementedError
 
-    def plot(self, X, names=None):
+    def plot(self, X, names=None, inner_pval=None):
         """ Plot SWEAT associations for target terms X wrt polarization sets A&B for models slices
             - models: gensim models
             - X: target terms (strings)
@@ -85,6 +91,12 @@ class SWEAT:
             if type(names) != dict:
                 raise RuntimeError("Names argument must be dictionary")
 
+        if inner_pval is not None:
+            if type(inner_pval) != float:
+                raise RuntimeError("Confidence Level argument must be float")
+
+        # association multi-array
+        # (models) x (topic words) x (pos, neg) x (polar word)
         assocs = [
             [
                 [
@@ -95,17 +107,21 @@ class SWEAT:
             ]
 
         f, axes = plt.subplots(1, 2, sharey=True)
-        f.set_size_inches(12, 6)
+        f.set_size_inches(12, len(X)*0.8)
 
+        # for both slice models
         for i, ass_mod in enumerate(assocs):
 
             S = []  # vector for computing cumulative sum of association deltas
             ax = axes[i]
 
+            # for each word in topic-wordset
             for j, ass_word in enumerate(ass_mod):
+                # get both attribute-wordsets
                 assA = ass_word[0]
                 assB = ass_word[1]
 
+                # boxplots for attribute wordsets associations
                 boxA = ax.boxplot(assA,
                                   positions=[2 * j - 0.3], widths=0.3,
                                   boxprops=dict(color="red"), vert=False, showmeans=True, meanline=True,
@@ -124,9 +140,15 @@ class SWEAT:
                 dAB = muA - muB
                 S.append(dAB)
 
+		# default arrow coloring
                 arr_col = "blue" if (dAB < 0) else "red"
 
-                # word arrow
+                # set gray coloring for non-significant deltas
+                if inner_pval is not None:
+                    pval = stats.ttest_rel(assA,assB)[1]
+                    if pval > inner_pval: arr_col = "grey"
+
+                # plot word arrow
                 ax.arrow(muA, 2 * j, -dAB, 0,
                          head_width=0.15, head_length=0.02, lw=1.5, length_includes_head=True, color=arr_col
                          )
@@ -188,7 +210,7 @@ class SWEAT:
             plt.broken_barh([ (0,pos) ], yrange=(i-0.4, 0.8), facecolors=(bar_cols[0]) , label=attr_labels[0])
             plt.broken_barh([ (neg,abs(neg))], yrange=(i-0.4, 0.8), facecolors=(bar_cols[1]), label=attr_labels[1] )
             
-            plt.scatter([cumulative],[i],facecolor=dot_cols[0],edgecolor=dot_cols[1], label='sum')
+            plt.scatter([cumulative],[i],facecolor=dot_cols[0],edgecolor=dot_cols[1], label='cumulative')
             
             xl = max(xl,max(abs(pos),abs(neg)))
 
