@@ -6,6 +6,7 @@ import pickle
 import pandas as pd
 import itertools
 from collections import Counter
+import codecs
 
 _MEASURES = ["jaccard", "count", "raw"]
 
