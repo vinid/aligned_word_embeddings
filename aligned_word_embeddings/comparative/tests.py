@@ -64,7 +64,10 @@ class SWEAT:
             if two_tails:
                 over = sum([abs(d) <= abs(score) for d in ds])
             else:
-                over = sum([d <= score for d in ds])
+                if score > 0:
+                        over = sum([d <= score for d in ds])
+                else:
+                        over = sum([d >= score for d in ds])
 
             pval = 1 - (over / n)
             
