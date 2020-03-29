@@ -323,13 +323,13 @@ def augment_multi(word, models, n=1, m=1000, sample=True):
     return np.array(synth)
 
 
-def vocabulary_dataframe(corpora, verbose=False, filter_common = True, min_count=5):
+def vocabulary_dataframe(corpora, verbose=False, filter_common = True, min_count=5, encoding="utf-8"):
     '''Build zipf dataframe for corpora'''
     # build zipf dicts
     wordzipfers = {}
     for f in corpora:
         name = f.split("/")[-1][:-4]
-        with codecs.open(f) as fin:
+        with codecs.open(f, encoding=encoding) as fin:
             wc = Counter(fin.read().split())
         if verbose: print("count",name)
         
@@ -364,14 +364,14 @@ def vocabulary_dataframe(corpora, verbose=False, filter_common = True, min_count
     return df
 
 
-def comparative_dataframe(models, corpora, min_count = 5, filter_common = True, verbose = True):
+def comparative_dataframe(models, corpora, min_count = 5, filter_common = True, verbose = True, encoding="utf-8"):
     ''' Build comparative dataframe for multiple models'''
     names = [f.split("/")[-1][:-4] for f in corpora]
 
     if len(models)!=len(corpora):
         raise RuntimeError("models and corpora must be same length")
 
-    df = vocabulary_dataframe(corpora, verbose=verbose, filter_common = filter_common, min_count=min_count)
+    df = vocabulary_dataframe(corpora, verbose=verbose, filter_common = filter_common, min_count=min_count, encoding=encoding)
 
     for i, j in itertools.permutations(range(len(models)),2):
         df['Corr %s2%s' %(names[i],names[j])] = [ corresp_transpose(x,models[i],models[j]) for x in df.index ]

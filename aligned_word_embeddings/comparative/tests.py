@@ -83,7 +83,7 @@ class SWEAT:
         else:
             raise NotImplementedError
 
-    def plot(self, X, names=None, inner_pval=None):
+    def plot_details(self, X, names=None, inner_pval=None):
         """ Plot SWEAT associations for target terms X wrt polarization sets A&B for models slices
             - models: gensim models
             - X: target terms (strings)
@@ -213,7 +213,7 @@ class SWEAT:
             plt.broken_barh([ (0,pos) ], yrange=(i-0.4, 0.8), facecolors=(bar_cols[0]) , label=attr_labels[0])
             plt.broken_barh([ (neg,abs(neg))], yrange=(i-0.4, 0.8), facecolors=(bar_cols[1]), label=attr_labels[1] )
             
-            plt.scatter([cumulative],[i],facecolor=dot_cols[0],edgecolor=dot_cols[1], label='cumulative')
+            plt.scatter([cumulative],[i],facecolor=dot_cols[0],edgecolor=dot_cols[1], label='cumulate')
             
             xl = max(xl,max(abs(pos),abs(neg)))
 
